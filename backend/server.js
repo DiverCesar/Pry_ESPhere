@@ -8,7 +8,7 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 
-import helmet from 'helmet';
+const helmet = require('helmet');
 
 app.use(
   helmet({
@@ -18,7 +18,7 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://pryesphere-production.up.railway.app"],
+        connectSrc: ["'self'", "https://pryesphere-production.up.railway.app", "ws://localhost:*"],
         imgSrc: ["'self'", "data:", "blob:"],
       },
     },
