@@ -1,23 +1,12 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
-
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-
-const app = express();
-
-const helmet = require('helmet');
-
+// 1. Helmet primero
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         connectSrc: ["'self'", "https://pryesphere-production.up.railway.app", "ws://localhost:*"],
         imgSrc: ["'self'", "data:", "blob:"],
       },
@@ -25,21 +14,26 @@ app.use(
   })
 );
 
-// Middlewares
+// 2. CORS / JSON / etc.
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // permitimos JSON grande para base64
+app.use(express.json({ limit: '10mb' }));
 
-// Rutas
+// 3. Sirvo la carpeta build de React (si corresponde)
+// app.use(express.static(path.join(__dirname, 'client/build')));
+
+// 4. Rutas de API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB conectado'))
-.catch(err => console.error('Error conectando a MongoDB:', err));
+// 5. Para producción: redirigir todo lo que no sea /api a index.html
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'client/build/index.html'));
+// });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+// 6. Conexión a MongoDB y arranque del servidor
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+  })
+  .catch(err => console.error('Error conectando a MongoDB:', err));
