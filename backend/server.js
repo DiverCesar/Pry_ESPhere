@@ -1,16 +1,17 @@
+// PRY_ESPHERE/backend/server.js (solo API)
+
 const express = require('express');
-const helmet  = require('helmet');
-const cors    = require('cors');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 
-// —————— Aquí debes definir “app” ANTES de usar app.use() ——————
 const app = express();
 
-// Ahora sí puedes usar app.use(helmet(...)) y el resto:
+// — Helmet + CSP (tal como lo tenías) — 
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -26,13 +27,17 @@ app.use(
   })
 );
 
+// — CORS abierto a todos — 
 app.use(cors());
+
+// — Parseo de JSON — 
 app.use(express.json({ limit: '10mb' }));
 
+// — Rutas de la API — 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Conexión a MongoDB (sin opciones deprecadas)
+// — Conexión a MongoDB (sin useNewUrlParser / useUnifiedTopology, ya no hacen falta) —
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB conectado'))
